@@ -319,7 +319,7 @@ Provide a helpful response:`,
 
       console.log('🤖 AI Response received:', aiResponse);
 
-      await fetch('${API_CONFIG.WIDGET_URL}/message', {
+      await fetch(`${API_CONFIG.WIDGET_URL}/message`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

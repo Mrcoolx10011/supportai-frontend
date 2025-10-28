@@ -1,0 +1,41 @@
+{
+  "name": "CannedResponse",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client entity"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short title for the response"
+    },
+    "shortcut": {
+      "type": "string",
+      "description": "Keyboard shortcut (e.g., /hello)"
+    },
+    "content": {
+      "type": "string",
+      "description": "The actual response text"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category of the response"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this response is active"
+    },
+    "usage_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this has been used"
+    }
+  },
+  "required": [
+    "client_id",
+    "title",
+    "content"
+  ]
+}

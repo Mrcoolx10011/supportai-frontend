@@ -1,0 +1,61 @@
+{
+  "name": "TeamMember",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client entity"
+    },
+    "user_email": {
+      "type": "string",
+      "description": "Email of the team member"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "agent",
+        "manager",
+        "admin"
+      ],
+      "default": "agent",
+      "description": "Role in the team"
+    },
+    "availability_status": {
+      "type": "string",
+      "enum": [
+        "online",
+        "offline",
+        "busy",
+        "away"
+      ],
+      "default": "offline",
+      "description": "Current availability"
+    },
+    "max_concurrent_chats": {
+      "type": "number",
+      "default": 5,
+      "description": "Maximum chats agent can handle"
+    },
+    "current_active_chats": {
+      "type": "number",
+      "default": 0,
+      "description": "Current number of active chats"
+    },
+    "specialties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Areas of expertise"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the member is active"
+    }
+  },
+  "required": [
+    "client_id",
+    "user_email"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "id": "string",
+  "username": "string",
+  "email": "string",
+  "firstName": "string",
+  "lastName": "string",
+  "avatar": "string",
+  "role": "client | agent | admin",
+  "isActive": "boolean",
+  "lastSeen": "datetime",
+  "preferences": {
+    "language": "string",
+    "timezone": "string",
+    "notifications": {}
+  },
+  "createdAt": "datetime",
+  "updatedAt": "datetime"
+}

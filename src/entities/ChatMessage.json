@@ -1,0 +1,41 @@
+{
+  "name": "ChatMessage",
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "string",
+      "description": "Reference to ChatConversation entity"
+    },
+    "sender_type": {
+      "type": "string",
+      "enum": [
+        "customer",
+        "bot",
+        "agent"
+      ],
+      "description": "Who sent the message"
+    },
+    "sender_name": {
+      "type": "string",
+      "description": "Name of the sender"
+    },
+    "message": {
+      "type": "string",
+      "description": "Message content"
+    },
+    "confidence_score": {
+      "type": "number",
+      "description": "AI confidence score for bot responses"
+    },
+    "is_automated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this was an automated response"
+    }
+  },
+  "required": [
+    "conversation_id",
+    "sender_type",
+    "message"
+  ]
+}

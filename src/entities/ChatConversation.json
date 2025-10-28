@@ -1,0 +1,54 @@
+{
+  "name": "ChatConversation",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client entity"
+    },
+    "customer_email": {
+      "type": "string",
+      "description": "Customer's email address"
+    },
+    "customer_name": {
+      "type": "string",
+      "description": "Customer's name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "bot_active",
+        "awaiting_agent",
+        "with_agent",
+        "resolved"
+      ],
+      "default": "bot_active",
+      "description": "Current conversation status"
+    },
+    "assigned_agent": {
+      "type": "string",
+      "description": "Email of assigned agent"
+    },
+    "handoff_requested": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether customer requested human agent"
+    },
+    "handoff_reason": {
+      "type": "string",
+      "description": "Reason for handoff to human agent"
+    },
+    "is_resolved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether conversation is resolved"
+    },
+    "satisfaction_rating": {
+      "type": "number",
+      "description": "Customer satisfaction rating 1-5"
+    }
+  },
+  "required": [
+    "client_id"
+  ]
+}

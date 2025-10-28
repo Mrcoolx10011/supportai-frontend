@@ -1,0 +1,44 @@
+{
+  "name": "CSATSurvey",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client entity"
+    },
+    "ticket_id": {
+      "type": "string",
+      "description": "Reference to Ticket entity"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Reference to ChatConversation entity"
+    },
+    "customer_email": {
+      "type": "string",
+      "description": "Customer's email"
+    },
+    "rating": {
+      "type": "number",
+      "description": "Rating 1-5 stars"
+    },
+    "feedback": {
+      "type": "string",
+      "description": "Customer feedback text"
+    },
+    "agent_email": {
+      "type": "string",
+      "description": "Agent who handled the case"
+    },
+    "submitted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When survey was submitted"
+    }
+  },
+  "required": [
+    "client_id",
+    "customer_email",
+    "rating"
+  ]
+}

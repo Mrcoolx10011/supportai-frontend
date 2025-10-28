@@ -1,0 +1,44 @@
+{
+  "name": "KnowledgeBaseItem",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client entity"
+    },
+    "question": {
+      "type": "string",
+      "description": "Question or topic"
+    },
+    "answer": {
+      "type": "string",
+      "description": "Answer or information"
+    },
+    "category": {
+      "type": "string",
+      "description": "Category of the knowledge base item"
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Tags for better searchability"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this item is active"
+    },
+    "usage_count": {
+      "type": "number",
+      "default": 0,
+      "description": "How many times this has been used"
+    }
+  },
+  "required": [
+    "client_id",
+    "question",
+    "answer"
+  ]
+}

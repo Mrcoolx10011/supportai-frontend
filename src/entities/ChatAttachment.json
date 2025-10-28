@@ -1,0 +1,39 @@
+{
+  "name": "ChatAttachment",
+  "type": "object",
+  "properties": {
+    "conversation_id": {
+      "type": "string",
+      "description": "Reference to ChatConversation"
+    },
+    "message_id": {
+      "type": "string",
+      "description": "Reference to ChatMessage"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "URL of the uploaded file"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Original filename"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "MIME type of file"
+    },
+    "file_size": {
+      "type": "number",
+      "description": "File size in bytes"
+    },
+    "uploaded_by": {
+      "type": "string",
+      "description": "Email of uploader"
+    }
+  },
+  "required": [
+    "conversation_id",
+    "file_url",
+    "file_name"
+  ]
+}

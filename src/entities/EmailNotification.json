@@ -1,0 +1,59 @@
+{
+  "name": "EmailNotification",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client entity"
+    },
+    "recipient_email": {
+      "type": "string",
+      "description": "Email address of recipient"
+    },
+    "notification_type": {
+      "type": "string",
+      "enum": [
+        "new_ticket",
+        "new_chat",
+        "ticket_assigned",
+        "ticket_resolved",
+        "csat_survey"
+      ],
+      "description": "Type of notification"
+    },
+    "subject": {
+      "type": "string",
+      "description": "Email subject"
+    },
+    "body": {
+      "type": "string",
+      "description": "Email body content"
+    },
+    "related_id": {
+      "type": "string",
+      "description": "ID of related ticket/conversation"
+    },
+    "sent_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the email was sent"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "sent",
+        "failed"
+      ],
+      "default": "pending",
+      "description": "Delivery status"
+    }
+  },
+  "required": [
+    "client_id",
+    "recipient_email",
+    "notification_type",
+    "subject",
+    "body"
+  ]
+}

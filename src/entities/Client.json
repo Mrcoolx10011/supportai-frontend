@@ -1,0 +1,51 @@
+{
+  "name": "Client",
+  "type": "object",
+  "properties": {
+    "company_name": {
+      "type": "string",
+      "description": "Name of the client company"
+    },
+    "domain": {
+      "type": "string",
+      "description": "Primary website domain"
+    },
+    "logo_url": {
+      "type": "string",
+      "description": "URL to company logo"
+    },
+    "primary_color": {
+      "type": "string",
+      "default": "#4F46E5",
+      "description": "Brand primary color for chatbot"
+    },
+    "chatbot_greeting": {
+      "type": "string",
+      "default": "Hi! How can I help you today?",
+      "description": "Initial chatbot greeting message"
+    },
+    "chatbot_position": {
+      "type": "string",
+      "enum": [
+        "bottom-right",
+        "bottom-left"
+      ],
+      "default": "bottom-right",
+      "description": "Position of chatbot widget"
+    },
+    "confidence_threshold": {
+      "type": "number",
+      "default": 0.7,
+      "description": "Minimum confidence for automated responses"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the client account is active"
+    }
+  },
+  "required": [
+    "company_name",
+    "domain"
+  ]
+}

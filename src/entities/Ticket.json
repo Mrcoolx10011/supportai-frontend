@@ -1,0 +1,91 @@
+{
+  "name": "Ticket",
+  "type": "object",
+  "properties": {
+    "client_id": {
+      "type": "string",
+      "description": "Reference to Client entity"
+    },
+    "conversation_id": {
+      "type": "string",
+      "description": "Reference to ChatConversation entity"
+    },
+    "customer_email": {
+      "type": "string",
+      "description": "Customer's email address"
+    },
+    "customer_name": {
+      "type": "string",
+      "description": "Customer's name"
+    },
+    "title": {
+      "type": "string",
+      "description": "Ticket title/summary"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the issue"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "billing",
+        "technical",
+        "product",
+        "account",
+        "general"
+      ],
+      "default": "general",
+      "description": "Ticket category"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "default": "medium",
+      "description": "Ticket priority level"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "in_progress",
+        "waiting_customer",
+        "resolved",
+        "closed"
+      ],
+      "default": "open",
+      "description": "Current ticket status"
+    },
+    "assigned_to": {
+      "type": "string",
+      "description": "Email of assigned agent"
+    },
+    "resolution_notes": {
+      "type": "string",
+      "description": "Notes on how the ticket was resolved"
+    },
+    "satisfaction_rating": {
+      "type": "number",
+      "description": "Customer satisfaction rating 1-5"
+    },
+    "resolved_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the ticket was resolved"
+    },
+    "first_response_time": {
+      "type": "number",
+      "description": "Time to first response in seconds"
+    }
+  },
+  "required": [
+    "client_id",
+    "title",
+    "customer_email"
+  ]
+}

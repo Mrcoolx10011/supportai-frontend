@@ -17,6 +17,7 @@ export default function ChatWidget() {
   const [showInfoForm, setShowInfoForm] = useState(true);
   const [currentConversation, setCurrentConversation] = useState(null);
   const [isLoadingSettings, setIsLoadingSettings] = useState(false);
+  const [isWidgetAuthenticated, setIsWidgetAuthenticated] = useState(false);
   const [clientSettings, setClientSettings] = useState({
     primary_color: '#4F46E5',
     chatbot_greeting: 'Hi! How can I help you today?',
@@ -28,6 +29,44 @@ export default function ChatWidget() {
 
   const urlParams = new URLSearchParams(window.location.search);
   const clientId = urlParams.get('client_id') || 'demo-client';
+
+  // Auto-authenticate widget silently for AI access
+  const autoAuthenticateWidget = async () => {
+    try {
+      if (!base44.auth.isAuthenticated()) {
+        console.log('🔑 Widget auto-authenticating for AI access...');
+        const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/auth/login`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: 'test@example.com',
+            password: 'password123'
+          }),
+        });
+        
+        const data = await response.json();
+        if (data.token) {
+          base44.setToken(data.token);
+          setIsWidgetAuthenticated(true);
+          console.log('✅ Widget authenticated for AI access');
+          return true;
+        }
+      } else {
+        setIsWidgetAuthenticated(true);
+        return true;
+      }
+    } catch (error) {
+      console.log('⚠️ Widget authentication failed, AI responses may not work:', error);
+      setIsWidgetAuthenticated(false);
+      return false;
+    }
+  };
+
+  useEffect(() => {
+    autoAuthenticateWidget();
+  }, []);
 
   useEffect(() => {
     // CRITICAL: Hide everything and make transparent
@@ -228,6 +267,15 @@ export default function ChatWidget() {
     if (!currentConversation) return;
 
     try {
+      // Ensure we're authenticated for AI access
+      if (!isWidgetAuthenticated || !base44.auth.isAuthenticated()) {
+        console.log('⚠️ Widget not authenticated, trying to re-authenticate...');
+        await autoAuthenticateWidget();
+        if (!base44.auth.isAuthenticated()) {
+          throw new Error('Authentication failed for AI access');
+        }
+      }
+
       let knowledgeBase = [];
       try {
         knowledgeBase = await base44.entities.KnowledgeBaseItem.filter({ 
@@ -246,6 +294,7 @@ export default function ChatWidget() {
         `${m.sender_type}: ${m.message}`
       ).join('\n');
 
+      console.log('🤖 Calling AI for response...');
       const aiResponse = await base44.integrations.Core.InvokeLLM({
         prompt: `You are a helpful customer support assistant for ${clientSettings.company_name || 'our company'}. Use the following knowledge base to answer the customer's question. Be friendly, professional, and concise. If you don't have enough information to answer accurately, politely say you'll connect them with a human agent.
 
@@ -267,6 +316,8 @@ Provide a helpful response:`,
           }
         }
       });
+
+      console.log('🤖 AI Response received:', aiResponse);
 
       await fetch('${API_CONFIG.WIDGET_URL}/message', {
         method: 'POST',

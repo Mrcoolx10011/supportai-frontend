@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { base44 } from "../api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, RefreshCw } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 
@@ -19,19 +19,33 @@ export default function KnowledgeBase() {
     queryKey: ['knowledgeBase'],
     queryFn: async () => {
       console.log('🔍 Fetching Knowledge Base items...');
-      console.log('🔍 Base44 client ready:', base44.isReady);
-      console.log('🔍 Base44 token present:', !!base44.token);
+      console.log('� Client ready:', base44.isReady, 'Has token:', !!base44.token);
+      
+      if (!base44.isReady || !base44.token) {
+        console.log('⚠️ Client not ready, waiting...');
+        throw new Error('Client not ready');
+      }
+      
       const response = await base44.entities.KnowledgeBaseItem.list('-usage_count');
       console.log('📚 Knowledge Base API response:', response);
       console.log('📚 Response type:', typeof response);
       console.log('📚 Is array:', Array.isArray(response));
+      console.log('📚 Items count:', response?.length);
       return response;
     },
     initialData: [],
-    retry: 3, // Retry failed requests
-    retryDelay: 1000, // Wait 1 second between retries
-    refetchOnWindowFocus: false, // Disable automatic refetch
+    retry: 5,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
+    enabled: true, // Always enabled, will retry when client becomes ready
   });
+
+  // Auto-refetch when client becomes ready
+  useEffect(() => {
+    if (base44.isReady && base44.token && (!items || items.length === 0)) {
+      console.log('🔄 Client ready, auto-refreshing knowledge base...');
+      refetch();
+    }
+  }, [base44.isReady, base44.token, refetch, items]);
 
   const createItemMutation = useMutation({
     mutationFn: (data) => base44.entities.KnowledgeBaseItem.create(data),
@@ -90,32 +104,37 @@ export default function KnowledgeBase() {
           <h1 className="text-3xl font-bold text-slate-900">Knowledge Base</h1>
           <p className="text-slate-600 mt-1">Train your AI assistant with FAQs and information</p>
         </div>
-        <Button 
-          onClick={() => {
-            setEditingItem(null);
-            setShowForm(true);
-          }}
-          className="bg-indigo-600 hover:bg-indigo-700"
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Knowledge
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            onClick={() => refetch()}
+            variant="outline"
+            className="border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+            disabled={isLoading}
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          <Button 
+            onClick={() => {
+              setEditingItem(null);
+              setShowForm(true);
+            }}
+            className="bg-indigo-600 hover:bg-indigo-700"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add Knowledge
+          </Button>
+        </div>
       </div>
 
       {/* Debug info */}
       {process.env.NODE_ENV === 'development' && (
         <div className="text-xs text-gray-500 p-2 bg-gray-50 rounded">
-          Items Count: {Array.isArray(items) ? items.length : 'N/A'} | 
+          Total Items: {Array.isArray(items) ? items.length : 'N/A'} | 
           Loading: {isLoading ? 'Yes' : 'No'} | 
           Error: {error ? error.message : 'None'} |
           Client Ready: {base44.isReady ? 'Yes' : 'No'} |
-          Token: {base44.token ? 'Present' : 'None'} |
-          <button 
-            onClick={() => refetch()} 
-            className="ml-2 px-2 py-1 bg-blue-500 text-white rounded text-xs"
-          >
-            Refresh
-          </button>
+          Has Token: {base44.token ? 'Yes' : 'No'}
         </div>
       )}
 

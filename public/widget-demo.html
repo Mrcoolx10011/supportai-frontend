@@ -166,13 +166,9 @@
     <!-- SupportAI Chat Widget -->
     <script>
       (function() {
-        // Get the current host for the widget
-        var widgetHost = window.location.protocol + '//' + window.location.host;
-        var clientId = 'demo-client'; // You can customize this
-        
         // Create iframe for the chat widget
         var iframe = document.createElement('iframe');
-        iframe.src = widgetHost + '/ChatWidget?client_id=' + clientId;
+        iframe.src = 'https://supportai-frontend.vercel.app/ChatWidget?client_id=demo-client';
         iframe.style.cssText = 'position:fixed!important;bottom:0!important;right:0!important;width:100vw!important;height:100vh!important;border:none!important;z-index:2147483647!important;pointer-events:none!important;background:transparent!important;';
         iframe.setAttribute('allowtransparency', 'true');
         iframe.setAttribute('scrolling', 'no');
@@ -195,7 +191,7 @@
         
         // Message handling for responsive design
         window.addEventListener('message', function(event) {
-          if (event.origin !== widgetHost) return;
+          if (event.origin !== 'https://supportai-frontend.vercel.app') return;
           if (event.data.type === 'supportai-resize') {
             iframe.style.width = event.data.width || '100vw';
             iframe.style.height = event.data.height || '100vh';

@@ -30,7 +30,7 @@ export default function CannedResponses() {
   });
   const queryClient = useQueryClient();
 
-  const { data: responses, isLoading, error, refetch } = useQuery({
+  const { data: responses = [], isLoading, error, refetch } = useQuery({
     queryKey: ['cannedResponses'],
     queryFn: async () => {
       console.log('🔍 Fetching Canned Responses...');
@@ -45,21 +45,21 @@ export default function CannedResponses() {
       console.log('💬 Canned Responses API response:', response);
       console.log('💬 Is array:', Array.isArray(response));
       console.log('💬 Response length:', response?.length);
-      return response;
+      return response || [];
     },
     initialData: [],
-    retry: 5,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
-    enabled: true, // Always enabled, will retry when client becomes ready
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
+    enabled: base44.isReady && !!base44.token,
   });
 
-  // Auto-refetch when client becomes ready
+  // Fetch when client becomes ready or page loads
   useEffect(() => {
-    if (base44.isReady && base44.token && (!responses || responses.length === 0)) {
-      console.log('🔄 Client ready, auto-refreshing canned responses...');
+    if (base44.isReady && base44.token) {
+      console.log('🔄 Client ready, fetching canned responses...');
       refetch();
     }
-  }, [base44.isReady, base44.token, refetch, responses]);
+  }, [base44.isReady, base44.token, refetch]);
 
   // Ensure responses is always an array
   const safeResponses = Array.isArray(responses) ? responses : [];

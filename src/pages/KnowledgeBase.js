@@ -15,7 +15,7 @@ export default function KnowledgeBase() {
   const [showForm, setShowForm] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: items, isLoading, error, refetch } = useQuery({
+  const { data: items = [], isLoading, error, refetch } = useQuery({
     queryKey: ['knowledgeBase'],
     queryFn: async () => {
       console.log('🔍 Fetching Knowledge Base items...');
@@ -28,24 +28,23 @@ export default function KnowledgeBase() {
       
       const response = await base44.entities.KnowledgeBaseItem.list('-usage_count');
       console.log('📚 Knowledge Base API response:', response);
-      console.log('📚 Response type:', typeof response);
       console.log('📚 Is array:', Array.isArray(response));
       console.log('📚 Items count:', response?.length);
-      return response;
+      return response || [];
     },
     initialData: [],
-    retry: 5,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
-    enabled: true, // Always enabled, will retry when client becomes ready
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 3000),
+    enabled: base44.isReady && !!base44.token,
   });
 
-  // Auto-refetch when client becomes ready
+  // Fetch when client becomes ready or page loads
   useEffect(() => {
-    if (base44.isReady && base44.token && (!items || items.length === 0)) {
-      console.log('🔄 Client ready, auto-refreshing knowledge base...');
+    if (base44.isReady && base44.token) {
+      console.log('🔄 Client ready, fetching knowledge base...');
       refetch();
     }
-  }, [base44.isReady, base44.token, refetch, items]);
+  }, [base44.isReady, base44.token, refetch]);
 
   const createItemMutation = useMutation({
     mutationFn: (data) => base44.entities.KnowledgeBaseItem.create(data),

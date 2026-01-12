@@ -11,9 +11,14 @@ export default function ResponseTimeChart({ tickets }) {
     });
 
     return last7Days.map(date => {
-      const dayTickets = tickets.filter(t => 
-        new Date(t.created_date).toISOString().split('T')[0] === date
-      );
+      const dayTickets = tickets.filter(t => {
+        if (!t.created_date) return false;
+        try {
+          return new Date(t.created_date).toISOString().split('T')[0] === date;
+        } catch {
+          return false;
+        }
+      });
       const avgTime = dayTickets.reduce((acc, t) => acc + (t.first_response_time || 0), 0) / (dayTickets.length || 1);
       
       return {

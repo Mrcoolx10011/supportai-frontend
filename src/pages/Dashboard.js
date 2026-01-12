@@ -17,16 +17,18 @@ import SatisfactionChart from "../components/dashboard/SatisfactionChart";
 import AgentPerformance from "../components/dashboard/AgentPerformance";
 
 export default function Dashboard() {
-  const { data: tickets, isLoading: ticketsLoading } = useQuery({
+  const { data: tickets = [], isLoading: ticketsLoading } = useQuery({
     queryKey: ['allTickets'],
     queryFn: () => base44.entities.Ticket.list('-created_date'),
-    initialData: [],
+    enabled: base44.isReady && !!base44.token,
+    retry: 3,
   });
 
-  const { data: conversations } = useQuery({
+  const { data: conversations = [] } = useQuery({
     queryKey: ['conversations'],
     queryFn: () => base44.entities.ChatConversation.list('-created_date'),
-    initialData: [],
+    enabled: base44.isReady && !!base44.token,
+    retry: 3,
   });
 
   const stats = React.useMemo(() => {

@@ -5,15 +5,19 @@ import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
-import { Send, User, Bot, UserCheck, Download, FileText, Image as ImageIcon } from "lucide-react";
+import { Send, User, Bot, UserCheck, Download, FileText, Image as ImageIcon, Ticket } from "lucide-react";
 import { format } from "date-fns";
 import { ScrollArea } from "../ui/scroll-area";
 import CannedResponsesPanel from "./CannedResponsesPanel";
 import FileUploadButton from "./FileUploadButton";
+import CreateTicketFromChatDialog from "./CreateTicketFromChatDialog";
+import TicketStatusDetector from "./TicketStatusDetector";
+import ConversationHistory from "./ConversationHistory";
 import { API_CONFIG } from "../../config/api";
 
 export default function ChatWindow({ conversation, currentUser, onTakeOver }) {
   const [message, setMessage] = useState("");
+  const [showCreateTicketDialog, setShowCreateTicketDialog] = useState(false);
   const scrollRef = useRef(null);
   const queryClient = useQueryClient();
 
@@ -69,6 +73,18 @@ export default function ChatWindow({ conversation, currentUser, onTakeOver }) {
       queryClient.invalidateQueries({ queryKey: ['chatMessages', conversation.id] });
       setMessage("");
     },
+  });
+
+  const createTicketMutation = useMutation({
+    mutationFn: (ticketData) => base44.entities.Ticket.create(ticketData),
+    onSuccess: (data) => {
+      console.log('✅ Ticket mutation succeeded:', data);
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      setShowCreateTicketDialog(false);
+    },
+    onError: (error) => {
+      console.error('❌ Ticket mutation failed:', error);
+    }
   });
 
   useEffect(() => {
@@ -154,6 +170,15 @@ export default function ChatWindow({ conversation, currentUser, onTakeOver }) {
             Take Over This Conversation
           </Button>
         )}
+        <Button
+          size="sm"
+          variant="outline"
+          className="mt-2"
+          onClick={() => setShowCreateTicketDialog(true)}
+        >
+          <Ticket className="w-4 h-4 mr-2" />
+          Create Ticket
+        </Button>
       </div>
 
       <ScrollArea className="flex-1 p-4" ref={scrollRef}>
@@ -210,6 +235,16 @@ export default function ChatWindow({ conversation, currentUser, onTakeOver }) {
                   <p className="text-xs text-slate-500 mt-1 px-2">
                     {msg.sender_name} • {format(new Date(msg.created_date), 'h:mm a')}
                   </p>
+
+                  {/* Show ticket status detector for customer messages */}
+                  {!isAgent && conversation.customer_email && (
+                    <TicketStatusDetector
+                      messageText={msg.message}
+                      customerEmail={conversation.customer_email}
+                      customerName={conversation.customer_name}
+                      conversationId={conversation.id}
+                    />
+                  )}
                 </div>
                 {isAgent && (
                   <Avatar className="w-8 h-8 mt-1">
@@ -223,6 +258,9 @@ export default function ChatWindow({ conversation, currentUser, onTakeOver }) {
           })}
         </div>
       </ScrollArea>
+
+      {/* Conversation History for Agents */}
+      <ConversationHistory conversation={conversation} />
 
       <div className="p-4 border-t border-slate-200 bg-white">
         <div className="flex gap-2 mb-2">
@@ -253,6 +291,15 @@ export default function ChatWindow({ conversation, currentUser, onTakeOver }) {
           </Button>
         </div>
       </div>
+
+      <CreateTicketFromChatDialog
+        open={showCreateTicketDialog}
+        onOpenChange={setShowCreateTicketDialog}
+        onSubmit={(data) => createTicketMutation.mutateAsync(data)}
+        isLoading={createTicketMutation.isPending}
+        conversation={conversation}
+        currentUser={currentUser}
+      />
     </div>
   );
 }

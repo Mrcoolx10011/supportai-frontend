@@ -9,6 +9,7 @@ import { Send, X, Bot, Minimize2, User, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { API_CONFIG } from "../config/api";
+import TicketStatusDetector from "../components/livechat/TicketStatusDetector";
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
@@ -551,26 +552,38 @@ Provide a helpful response:`,
                             const isBot = msg.sender_type === 'bot';
                             
                             return (
-                              <div key={msg.id} className={`flex gap-2 ${isCustomer ? 'justify-end' : ''}`}>
-                                {!isCustomer && (
-                                  <Avatar className="w-8 h-8">
-                                    <AvatarFallback style={{ backgroundColor: `${primaryColor}20` }}>
-                                      {isBot ? <Bot className="w-4 h-4" style={{ color: primaryColor }} /> : <User className="w-4 h-4" />}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                )}
-                                <div className={`max-w-[75%] ${isCustomer ? 'items-end' : ''}`}>
-                                  <div 
-                                    className={`rounded-2xl px-4 py-2 ${
-                                      isCustomer 
-                                        ? 'text-white' 
-                                        : 'bg-slate-100 text-slate-900'
-                                    }`}
-                                    style={isCustomer ? { backgroundColor: primaryColor } : {}}
-                                  >
-                                    <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                              <div key={msg.id}>
+                                <div className={`flex gap-2 ${isCustomer ? 'justify-end' : ''}`}>
+                                  {!isCustomer && (
+                                    <Avatar className="w-8 h-8">
+                                      <AvatarFallback style={{ backgroundColor: `${primaryColor}20` }}>
+                                        {isBot ? <Bot className="w-4 h-4" style={{ color: primaryColor }} /> : <User className="w-4 h-4" />}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                  )}
+                                  <div className={`max-w-[75%] ${isCustomer ? 'items-end' : ''}`}>
+                                    <div 
+                                      className={`rounded-2xl px-4 py-2 ${
+                                        isCustomer 
+                                          ? 'text-white' 
+                                          : 'bg-slate-100 text-slate-900'
+                                      }`}
+                                      style={isCustomer ? { backgroundColor: primaryColor } : {}}
+                                    >
+                                      <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+                                    </div>
                                   </div>
                                 </div>
+
+                                {/* Show ticket status detector for customer messages */}
+                                {isCustomer && currentConversation?.customer_email && (
+                                  <TicketStatusDetector
+                                    messageText={msg.message}
+                                    customerEmail={currentConversation.customer_email}
+                                    customerName={currentConversation.customer_name}
+                                    conversationId={currentConversation.id}
+                                  />
+                                )}
                               </div>
                             );
                           })}

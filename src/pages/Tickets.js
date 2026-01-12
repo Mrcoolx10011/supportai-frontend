@@ -17,14 +17,35 @@ export default function Tickets() {
 
   const { data: tickets, isLoading } = useQuery({
     queryKey: ['tickets'],
-    queryFn: () => base44.entities.Ticket.list('-created_date'),
+    queryFn: async () => {
+      console.log('🔍 Fetching tickets...');
+      try {
+        const response = await base44.entities.Ticket.list('-created_date');
+        console.log('📋 Tickets response:', response);
+        console.log('📋 Is array:', Array.isArray(response));
+        console.log('📋 Count:', response?.length);
+        return response;
+      } catch (error) {
+        console.error('❌ Ticket fetch error:', error);
+        return [];
+      }
+    },
     initialData: [],
+    refetchInterval: 3000, // Auto-refresh every 3 seconds
   });
 
   const updateTicketMutation = useMutation({
     mutationFn: ({ id, data }) => base44.entities.Ticket.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tickets'] });
+    },
+  });
+
+  const deleteTicketMutation = useMutation({
+    mutationFn: (id) => base44.entities.Ticket.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tickets'] });
+      setSelectedTicket(null);
     },
   });
 
@@ -45,6 +66,42 @@ export default function Tickets() {
 
   const handleUpdateTicket = (id, data) => {
     updateTicketMutation.mutate({ id, data });
+  };
+
+  const handleDeleteTicket = (id) => {
+    if (window.confirm('Are you sure you want to delete this ticket?')) {
+      deleteTicketMutation.mutate(id);
+    }
+  };
+
+  const handleShareTicket = async (ticket) => {
+    const ticketInfo = `
+📋 **Support Ticket Reference: ${ticket.ticket_number || ticket._id}**
+
+✅ **Status:** ${(ticket.status || 'open').toUpperCase()}
+⭐ **Priority:** ${(ticket.priority || 'medium').toUpperCase()}
+📂 **Category:** ${ticket.category || 'general'}
+
+📌 **Issue Title:** ${ticket.title}
+👤 **Customer Name:** ${ticket.customer_name || 'Not specified'}
+📧 **Email:** ${ticket.customer_email || 'Not specified'}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Thank you for contacting us! Your support ticket has been created and assigned to our support team. 
+
+We will review your issue and get back to you as soon as possible.
+
+**Please save this Reference ID for your records:**
+🔖 **${ticket.ticket_number || ticket._id}**
+
+You can use this ID to track the status of your ticket.
+    `.trim();
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(ticketInfo);
+    console.log('✅ Ticket information copied to clipboard:', ticketInfo);
+    alert('✅ Ticket information copied! You can now share it in the live chat.\n\n' + ticketInfo);
   };
 
   const handleCreateTicket = (data) => {
@@ -86,6 +143,9 @@ export default function Tickets() {
           ticket={selectedTicket}
           onClose={() => setSelectedTicket(null)}
           onUpdate={handleUpdateTicket}
+          onDelete={handleDeleteTicket}
+          onShare={handleShareTicket}
+          isDeleting={deleteTicketMutation.isPending}
         />
       )}
 

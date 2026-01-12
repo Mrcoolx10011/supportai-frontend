@@ -64,7 +64,7 @@ export default function RecentTickets({ tickets, isLoading }) {
               <div className="flex items-center gap-4 text-sm text-slate-500">
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  {format(new Date(ticket.created_date), 'MMM d, h:mm a')}
+                  {ticket.created_date ? format(new Date(ticket.created_date), 'MMM d, h:mm a') : 'N/A'}
                 </div>
                 <div className="text-slate-400">•</div>
                 <div>{ticket.category}</div>

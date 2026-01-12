@@ -61,6 +61,11 @@ export default function TicketList({ tickets, isLoading, selectedTicket, onSelec
             >
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-xs font-mono font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
+                      {ticket.ticket_number || 'TKT-00001'}
+                    </span>
+                  </div>
                   <h3 className="font-semibold text-lg text-slate-900 mb-2">{ticket.title}</h3>
                   <p className="text-sm text-slate-600 line-clamp-2">{ticket.description}</p>
                 </div>
@@ -85,13 +90,13 @@ export default function TicketList({ tickets, isLoading, selectedTicket, onSelec
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  {format(new Date(ticket.created_date), 'MMM d, h:mm a')}
+                  {ticket.created_date ? format(new Date(ticket.created_date), 'MMM d, h:mm a') : 'N/A'}
                 </div>
                 <Badge variant="outline" className="capitalize">{ticket.category}</Badge>
                 {ticket.assigned_to && (
                   <div className="flex items-center gap-1">
                     <User className="w-4 h-4" />
-                    <span>{ticket.assigned_to.split('@')[0]}</span>
+                    <span>{typeof ticket.assigned_to === 'string' ? ticket.assigned_to.split('@')[0] : ticket.assigned_to?.email?.split('@')[0]}</span>
                   </div>
                 )}
               </div>

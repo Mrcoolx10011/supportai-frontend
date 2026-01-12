@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { base44 } from './api/base44Client';
 import Layout from './Layout';
 import LoginPage from './components/LoginPage';
+import CustomerTicketTracker from './components/tickets/CustomerTicketTracker';
 
 // Import page components
 import Dashboard from './pages/Dashboard';
@@ -23,12 +24,14 @@ function App() {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   
-  // Check if this is the chat widget route (no auth needed)
+  // Check if this is a public route (no auth needed)
   const isChatWidget = location.pathname === '/chatwidget' || location.pathname === '/ChatWidget';
+  const isPublicTicketTracker = location.pathname === '/track-ticket';
+  const isPublicRoute = isChatWidget || isPublicTicketTracker;
   
-  // Check authentication on app load (skip for chat widget)
+  // Check authentication on app load (skip for public routes)
   useEffect(() => {
-    if (isChatWidget) {
+    if (isPublicRoute) {
       setLoading(false);
       return;
     }
@@ -49,7 +52,7 @@ function App() {
     };
 
     checkAuth();
-  }, [isChatWidget]);
+  }, [isPublicRoute]);
 
   // Handle login
   const handleLogin = (userData) => {
@@ -76,8 +79,8 @@ function App() {
 
   const currentPageName = getPageName(location.pathname);
 
-  // Show loading spinner while checking authentication (skip for chat widget)
-  if (loading && !isChatWidget) {
+  // Show loading spinner while checking authentication (skip for public routes)
+  if (loading && !isPublicRoute) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
@@ -86,6 +89,11 @@ function App() {
         </div>
       </div>
     );
+  }
+
+  // Render public routes without authentication
+  if (isPublicTicketTracker) {
+    return <CustomerTicketTracker />;
   }
 
   // Render chat widget without authentication

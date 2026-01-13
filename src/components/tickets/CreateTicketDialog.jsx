@@ -25,7 +25,13 @@ export default function CreateTicketDialog({ open, onOpenChange, onSubmit, isLoa
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit(formData);
+    // Add created_date when creating ticket
+    const ticketData = {
+      ...formData,
+      created_date: new Date().toISOString(),
+      status: 'open'
+    };
+    onSubmit(ticketData);
     setFormData({
       title: "",
       description: "",

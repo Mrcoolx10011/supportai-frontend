@@ -81,11 +81,17 @@
     "first_response_time": {
       "type": "number",
       "description": "Time to first response in seconds"
+    },
+    "created_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the ticket was created"
     }
   },
   "required": [
     "client_id",
     "title",
-    "customer_email"
+    "customer_email",
+    "created_date"
   ]
 }

@@ -85,7 +85,16 @@ export default function CreateTicketFromChatDialog({
       }, 2000);
     } catch (error) {
       console.error('❌ Error creating ticket:', error);
-      setError(error.message || 'Failed to create ticket. Please try again.');
+      let errorMessage = error.message || 'Failed to create ticket. Please try again.';
+      
+      // Handle specific error messages
+      if (error.message?.includes('Duplicate')) {
+        errorMessage = 'A ticket with this information already exists. Please check if you already created a ticket for this customer.';
+      } else if (error.message?.includes('Validation')) {
+        errorMessage = 'Please fill in all required fields correctly.';
+      }
+      
+      setError(errorMessage);
     }
   };
 

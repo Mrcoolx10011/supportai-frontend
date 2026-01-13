@@ -209,29 +209,31 @@ export default function CustomerTicketTracker() {
 
               {/* Timeline */}
               <div className="border-t pt-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Timeline</h3>
-                <div className="space-y-3">
-                  <div className="flex gap-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">📅 Timeline</h3>
+                <div className="space-y-0">
+                  {/* Ticket Created */}
+                  <div className="flex gap-4 pb-6">
                     <div className="flex flex-col items-center">
-                      <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                      <div className="w-1 h-12 bg-gray-200 my-2"></div>
+                      <div className="w-3 h-3 bg-blue-500 rounded-full mt-1"></div>
+                      <div className="w-1 bg-gray-300 flex-grow my-1" style={{minHeight: '48px'}}></div>
                     </div>
                     <div className="pb-6">
-                      <p className="font-semibold text-gray-800">Ticket Created</p>
+                      <p className="font-semibold text-gray-800">🎫 Ticket Created</p>
                       <p className="text-sm text-gray-600">
-                        {ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : 'N/A'}
+                        {ticket.created_date ? new Date(ticket.created_date).toLocaleString() : ticket.createdAt ? new Date(ticket.createdAt).toLocaleString() : 'N/A'}
                       </p>
                     </div>
                   </div>
 
+                  {/* First Response */}
                   {ticket.first_response_at && (
-                    <div className="flex gap-4">
+                    <div className="flex gap-4 pb-6">
                       <div className="flex flex-col items-center">
-                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                        <div className="w-1 h-12 bg-gray-200 my-2"></div>
+                        <div className="w-3 h-3 bg-blue-500 rounded-full mt-1"></div>
+                        <div className="w-1 bg-gray-300 flex-grow my-1" style={{minHeight: '48px'}}></div>
                       </div>
                       <div className="pb-6">
-                        <p className="font-semibold text-gray-800">First Response</p>
+                        <p className="font-semibold text-gray-800">⏱️ First Response</p>
                         <p className="text-sm text-gray-600">
                           {new Date(ticket.first_response_at).toLocaleString()}
                         </p>
@@ -239,21 +241,61 @@ export default function CustomerTicketTracker() {
                     </div>
                   )}
 
-                  {(ticket.status === 'resolved' || ticket.status === 'closed') && ticket.resolved_at && (
-                    <div className="flex gap-4">
+                  {/* Status Update - In Progress */}
+                  {ticket.status === 'in_progress' && (
+                    <div className="flex gap-4 pb-6">
                       <div className="flex flex-col items-center">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <div className="w-3 h-3 bg-blue-500 rounded-full mt-1"></div>
+                        <div className="w-1 bg-gray-300 flex-grow my-1" style={{minHeight: '48px'}}></div>
+                      </div>
+                      <div className="pb-6">
+                        <p className="font-semibold text-gray-800">🔄 Being Worked On</p>
+                        <p className="text-sm text-gray-600">Status updated to In Progress</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Resolution - Final */}
+                  {(ticket.status === 'resolved' || ticket.status === 'closed') && (
+                    <div className="flex gap-4 pb-6">
+                      <div className="flex flex-col items-center">
+                        <div className="w-3 h-3 bg-green-500 rounded-full mt-1"></div>
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-800">Resolved</p>
+                        <p className="font-semibold text-gray-800">✅ {ticket.status === 'closed' ? 'Closed' : 'Resolved'}</p>
                         <p className="text-sm text-gray-600">
-                          {new Date(ticket.resolved_at).toLocaleString()}
+                          {ticket.resolved_at ? new Date(ticket.resolved_at).toLocaleString() : ticket.updated_date ? new Date(ticket.updated_date).toLocaleString() : 'Recently'}
                         </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Still Open */}
+                  {ticket.status === 'open' || ticket.status === 'pending' && !ticket.resolved_at && (
+                    <div className="flex gap-4 pb-6">
+                      <div className="flex flex-col items-center">
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full mt-1"></div>
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-800">⏳ In Queue</p>
+                        <p className="text-sm text-gray-600">Waiting for next update</p>
                       </div>
                     </div>
                   )}
                 </div>
               </div>
+
+              {/* Resolution Notes */}
+              {ticket.resolution_notes && (
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-3">💬 Resolution Notes</h3>
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <p className="text-gray-700 whitespace-pre-wrap break-words text-sm leading-relaxed">
+                      {ticket.resolution_notes}
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Customer Info */}
               <div className="border-t pt-6">

@@ -90,7 +90,7 @@ export default function TicketList({ tickets, isLoading, selectedTicket, onSelec
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  {ticket.created_date ? format(new Date(ticket.created_date), 'MMM d, h:mm a') : 'N/A'}
+                  {ticket.created_date ? format(new Date(ticket.created_date), 'MMM d, h:mm a') : new Date().toLocaleDateString()}
                 </div>
                 <Badge variant="outline" className="capitalize">{ticket.category}</Badge>
                 {ticket.assigned_to && (

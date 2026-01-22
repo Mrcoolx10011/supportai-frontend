@@ -284,17 +284,15 @@ export default function LandingPage() {
                                 so you're never left wondering.
                             </p>
 
-                            <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex flex-col sm:flex-row items-center gap-6">
                                 <Link to="/track-ticket">
                                     <Button className="h-12 px-8 bg-slate-900 text-white hover:bg-slate-800 rounded-full shadow-lg flex items-center gap-2">
                                         Check Ticket Status <ArrowRight size={16} />
                                     </Button>
                                 </Link>
-                                <Link to="/#">
-                                    <Button variant="outline" className="h-12 px-8 border-slate-200 hover:bg-slate-50 text-slate-600 rounded-full">
-                                        Visit Knowledge Base
-                                    </Button>
-                                </Link>
+                                <span className="text-slate-600 font-medium">
+                                    Knowledge Base
+                                </span>
                             </div>
 
                             <div className="mt-8 flex items-center gap-4 text-sm text-slate-500">

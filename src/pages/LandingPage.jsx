@@ -290,7 +290,7 @@ export default function LandingPage() {
                                         Check Ticket Status <ArrowRight size={16} />
                                     </Button>
                                 </Link>
-                                <Link to="/knowledgebase">
+                                <Link to="/#">
                                     <Button variant="outline" className="h-12 px-8 border-slate-200 hover:bg-slate-50 text-slate-600 rounded-full">
                                         Visit Knowledge Base
                                     </Button>

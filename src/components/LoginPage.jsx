@@ -58,10 +58,18 @@ export default function LoginPage({ onLogin }) {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-slate-800">
-            SupportAI
-          </CardTitle>
-          <p className="text-slate-600">
+          <div className="flex flex-col items-center justify-center mb-2">
+            <img
+              src="/image/TrustDesk-logo.png"
+              alt="TrustDesk Logo"
+              className="h-20 w-auto mb-3 object-contain"
+            />
+            <CardTitle className="text-3xl font-bold text-slate-800">
+              TrustDesk
+            </CardTitle>
+            <p className="text-sm text-slate-500 font-medium mt-1">Dependable Customer Care</p>
+          </div>
+          <p className="text-slate-600 mt-2">
             {isLogin ? 'Sign in to your account' : 'Create a new account'}
           </p>
         </CardHeader>
@@ -81,7 +89,7 @@ export default function LoginPage({ onLogin }) {
                 />
               </div>
             )}
-            
+
             <div>
               <Label htmlFor="email">Email</Label>
               <Input

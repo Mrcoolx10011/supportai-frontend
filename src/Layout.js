@@ -75,6 +75,11 @@ const navigationItems = [
     icon: Users,
   },
   {
+    title: "Team Leaderboard",
+    url: createPageUrl("TeamLeaderboard"),
+    icon: TrendingUp,
+  },
+  {
     title: "Analytics",
     url: createPageUrl("Analytics"),
     icon: TrendingUp,
@@ -169,16 +174,16 @@ export default function Layout({ children, currentPageName }) {
         <Sidebar className="border-r border-slate-200/60 shadow-sm">
           <SidebarHeader className="border-b border-slate-200/60 p-6 bg-gradient-to-r from-indigo-600 to-indigo-700">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg">
-                <Bot className="w-6 h-6 text-indigo-600" />
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg overflow-hidden">
+                <img src="/image/TrustDesk-logo.png" alt="Logo" className="w-8 h-8 object-contain" />
               </div>
               <div>
-                <h2 className="font-bold text-white text-lg tracking-tight">SupportAI</h2>
-                <p className="text-xs text-indigo-200">Customer Support Hub</p>
+                <h2 className="font-bold text-white text-lg tracking-tight">TrustDesk</h2>
+                <p className="text-xs text-indigo-200">Dependable Customer Care</p>
               </div>
             </div>
           </SidebarHeader>
-          
+
           <SidebarContent className="p-3">
             <SidebarGroup>
               <SidebarGroupLabel className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-3">
@@ -190,12 +195,12 @@ export default function Layout({ children, currentPageName }) {
                     const isActive = location.pathname === item.url;
                     return (
                       <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton 
-                          asChild 
+                        <SidebarMenuButton
+                          asChild
                           className={`
                             transition-all duration-200 rounded-xl mb-1 group
-                            ${isActive 
-                              ? 'bg-indigo-50 text-indigo-700 shadow-sm' 
+                            ${isActive
+                              ? 'bg-indigo-50 text-indigo-700 shadow-sm'
                               : 'hover:bg-slate-50 text-slate-700'
                             }
                           `}

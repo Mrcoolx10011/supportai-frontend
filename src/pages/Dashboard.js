@@ -16,7 +16,16 @@ import ResponseTimeChart from "../components/dashboard/ResponseTimeChart";
 import SatisfactionChart from "../components/dashboard/SatisfactionChart";
 import AgentPerformance from "../components/dashboard/AgentPerformance";
 
+// AI Components
+import AIHealthCheck from "../components/ai/AIHealthCheck";
+import AIConfigDashboard from "../components/ai/AIConfigDashboard";
+import PredictiveAnalytics from "../components/ai/PredictiveAnalytics";
+import AITicketClassifier from "../components/ai/AITicketClassifier";
+import AIResponseSuggestions from "../components/ai/AIResponseSuggestions";
+
 export default function Dashboard() {
+  const [selectedTicket, setSelectedTicket] = React.useState(null);
+
   const { data: tickets = [], isLoading: ticketsLoading } = useQuery({
     queryKey: ['allTickets'],
     queryFn: () => base44.entities.Ticket.list('-created_date'),
@@ -102,16 +111,46 @@ export default function Dashboard() {
           <p className="text-slate-600">Monitor your customer support performance in real-time</p>
         </div>
 
+        {/* 🤖 AI SYSTEM STATUS - TOP SECTION */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200 p-6">
+          <h2 className="text-2xl font-bold text-blue-900 mb-4">🤖 AI Assistant Center</h2>
+          <AIHealthCheck />
+        </div>
+
         <StatsGrid stats={statsData} isLoading={ticketsLoading} />
+
+        {/* AI CONFIGURATION & PREDICTIONS */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">⚙️ AI Configuration & Analytics</h2>
+          <AIConfigDashboard tickets={tickets} />
+        </div>
 
         <div className="grid lg:grid-cols-2 gap-6">
           <ResponseTimeChart tickets={tickets} />
           <SatisfactionChart tickets={tickets} />
         </div>
 
+        {/* AI FEATURES */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          <AITicketClassifier 
+            ticket={selectedTicket}
+            ticketDescription={selectedTicket?.description || 'Select a ticket to analyze'} 
+            onClassify={(classification) => console.log('Classified:', classification)}
+          />
+          <AIResponseSuggestions 
+            ticket={selectedTicket}
+            onSelectResponse={(suggestion) => console.log('Selected:', suggestion)}
+          />
+        </div>
+
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <RecentTickets tickets={tickets.slice(0, 10)} isLoading={ticketsLoading} />
+            <RecentTickets 
+              tickets={tickets.slice(0, 10)} 
+              isLoading={ticketsLoading}
+              onSelectTicket={setSelectedTicket}
+              selectedTicketId={selectedTicket?.id}
+            />
           </div>
           <AgentPerformance />
         </div>

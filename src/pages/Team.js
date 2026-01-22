@@ -18,58 +18,87 @@ import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 
 export default function Team() {
+  console.log('🚀 Team component rendering');
   const [showDialog, setShowDialog] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
-    user_email: "",
+    full_name: "",
+    email: "",
+    password: "TempPassword123!",
     role: "agent",
-    client_id: "demo-client",
-    max_concurrent_chats: 5
+    status: "active"
   });
   const queryClient = useQueryClient();
 
+  console.log('📊 Current team members state:', teamMembers);
+
   useEffect(() => {
     const loadUser = async () => {
-      const user = await base44.auth.me();
-      setCurrentUser(user);
+      try {
+        const user = await base44.auth.me();
+        setCurrentUser(user);
+      } catch (err) {
+        console.error('Failed to load current user:', err);
+      }
     };
     loadUser();
   }, []);
 
-  const { data: teamMembers, isLoading } = useQuery({
-    queryKey: ['teamMembers'],
-    queryFn: () => base44.entities.TeamMember.list('-created_date'),
-    initialData: [],
-  });
+  // Load team members
+  useEffect(() => {
+    console.log('🔄 useEffect hook running - loading team members');
+    const loadTeamMembers = async () => {
+      try {
+        setIsLoading(true);
+        console.log('📋 About to call base44.entities.User.list()');
+        const result = await base44.entities.User.list();
+        console.log('✅ API call succeeded, result:', result);
+        console.log('✅ Result is array?', Array.isArray(result));
+        setTeamMembers(Array.isArray(result) ? result : []);
+        console.log('✅ State updated with:', Array.isArray(result) ? result : []);
+        setError(null);
+      } catch (err) {
+        console.error('❌ Failed to fetch team members:', err);
+        console.error('Error details:', { message: err.message, stack: err.stack });
+        setError(err.message || 'Failed to load team members');
+        setTeamMembers([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTeamMembers();
+  }, []);
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
       // Create team member
-      await base44.entities.TeamMember.create(data);
-      
-      // Send invitation email
-      await base44.integrations.Core.SendEmail({
-        to: data.user_email,
-        subject: "You've been invited to join the support team!",
-        body: `Hello,\n\nYou've been invited to join our customer support team as a ${data.role}.\n\nPlease sign up at: ${window.location.origin}\n\nBest regards,\nSupport Team`
-      });
+      await base44.entities.User.create(data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+    onSuccess: async () => {
+      // Reload team members
+      const result = await base44.entities.User.list();
+      setTeamMembers(Array.isArray(result) ? result : []);
       setShowDialog(false);
       setFormData({
-        user_email: "",
+        full_name: "",
+        email: "",
+        password: "TempPassword123!",
         role: "agent",
-        client_id: "demo-client",
-        max_concurrent_chats: 5
+        status: "active"
       });
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.TeamMember.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+    mutationFn: (id) => base44.entities.User.delete(id),
+    onSuccess: async () => {
+      // Reload team members
+      const result = await base44.entities.User.list();
+      setTeamMembers(Array.isArray(result) ? result : []);
     },
   });
 
@@ -139,7 +168,7 @@ export default function Team() {
               <div>
                 <p className="text-sm text-slate-600">Online Now</p>
                 <p className="text-2xl font-bold text-slate-900">
-                  {teamMembers.filter(m => m.availability_status === 'online').length}
+                  {teamMembers.filter(m => m.last_login && new Date(m.last_login) > new Date(Date.now() - 5*60000)).length}
                 </p>
               </div>
             </div>
@@ -178,33 +207,27 @@ export default function Team() {
           ) : (
             <div className="grid gap-4">
               {teamMembers.map((member) => (
-                <div key={member.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                <div key={member._id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-4">
                     <Avatar className="w-12 h-12">
                       <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-semibold">
-                        {member.user_email?.charAt(0).toUpperCase()}
+                        {member.full_name?.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="font-semibold text-slate-900">{member.user_email}</p>
+                        <p className="font-semibold text-slate-900">{member.full_name}</p>
                         <Badge className={roleColors[member.role]}>
                           {member.role}
                         </Badge>
-                        <Badge className={statusColors[member.availability_status]}>
-                          {member.availability_status}
+                        <Badge className={statusColors[member.status] || 'bg-slate-100 text-slate-700'}>
+                          {member.status}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-3 text-sm text-slate-600">
-                        <span>Max chats: {member.max_concurrent_chats}</span>
+                        <span>{member.email}</span>
                         <span>•</span>
-                        <span>Active: {member.current_active_chats || 0}</span>
-                        {member.specialties && member.specialties.length > 0 && (
-                          <>
-                            <span>•</span>
-                            <span>{member.specialties.join(', ')}</span>
-                          </>
-                        )}
+                        <span>{new Date(member.last_login || member.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
@@ -212,7 +235,7 @@ export default function Team() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDelete(member.id)}
+                      onClick={() => handleDelete(member._id)}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -232,12 +255,24 @@ export default function Team() {
           </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                type="text"
+                value={formData.full_name}
+                onChange={(e) => setFormData({...formData, full_name: e.target.value})}
+                placeholder="John Smith"
+                required
+              />
+            </div>
+
+            <div>
               <Label htmlFor="email">Email Address</Label>
               <Input
                 id="email"
                 type="email"
-                value={formData.user_email}
-                onChange={(e) => setFormData({...formData, user_email: e.target.value})}
+                value={formData.email}
+                onChange={(e) => setFormData({...formData, email: e.target.value})}
                 placeholder="agent@example.com"
                 required
               />
@@ -254,22 +289,9 @@ export default function Team() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="agent">Agent</SelectItem>
-                  <SelectItem value="manager">Manager</SelectItem>
                   <SelectItem value="admin">Admin</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="max_chats">Maximum Concurrent Chats</Label>
-              <Input
-                id="max_chats"
-                type="number"
-                value={formData.max_concurrent_chats}
-                onChange={(e) => setFormData({...formData, max_concurrent_chats: parseInt(e.target.value)})}
-                min="1"
-                max="20"
-              />
             </div>
 
             <DialogFooter>

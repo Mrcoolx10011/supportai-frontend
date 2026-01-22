@@ -18,8 +18,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Team() {
+  console.log('🚀 Team component rendering');
   const [showDialog, setShowDialog] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     user_email: "",
     role: "agent",
@@ -28,34 +32,56 @@ export default function Team() {
   });
   const queryClient = useQueryClient();
 
+  console.log('📊 Current team members state:', teamMembers);
+
+  // Load current user
   useEffect(() => {
     const loadUser = async () => {
-      const user = await base44.auth.me();
-      setCurrentUser(user);
+      try {
+        const user = await base44.auth.me();
+        setCurrentUser(user);
+      } catch (err) {
+        console.error('Failed to load current user:', err);
+      }
     };
     loadUser();
   }, []);
 
-  const { data: teamMembers, isLoading } = useQuery({
-    queryKey: ['teamMembers'],
-    queryFn: () => base44.entities.TeamMember.list('-created_date'),
-    initialData: [],
-  });
+  // Load team members
+  useEffect(() => {
+    console.log('🔄 useEffect hook running - loading team members');
+    const loadTeamMembers = async () => {
+      try {
+        setIsLoading(true);
+        console.log('📋 About to call base44.entities.User.list()');
+        const result = await base44.entities.User.list();
+        console.log('✅ API call succeeded, result:', result);
+        console.log('✅ Result is array?', Array.isArray(result));
+        setTeamMembers(Array.isArray(result) ? result : []);
+        console.log('✅ State updated with:', Array.isArray(result) ? result : []);
+        setError(null);
+      } catch (err) {
+        console.error('❌ Failed to fetch team members:', err);
+        console.error('Error details:', { message: err.message, stack: err.stack });
+        setError(err.message || 'Failed to load team members');
+        setTeamMembers([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTeamMembers();
+  }, []);
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
       // Create team member
-      await base44.entities.TeamMember.create(data);
-      
-      // Send invitation email
-      await base44.integrations.Core.SendEmail({
-        to: data.user_email,
-        subject: "You've been invited to join the support team!",
-        body: `Hello,\n\nYou've been invited to join our customer support team as a ${data.role}.\n\nPlease sign up at: ${window.location.origin}\n\nBest regards,\nSupport Team`
-      });
+      await base44.entities.User.create(data);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+    onSuccess: async () => {
+      // Reload team members
+      const result = await base44.entities.User.list();
+      setTeamMembers(Array.isArray(result) ? result : []);
       setShowDialog(false);
       setFormData({
         user_email: "",
@@ -67,9 +93,11 @@ export default function Team() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.TeamMember.delete(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
+    mutationFn: (id) => base44.entities.User.delete(id),
+    onSuccess: async () => {
+      // Reload team members
+      const result = await base44.entities.User.list();
+      setTeamMembers(Array.isArray(result) ? result : []);
     },
   });
 
@@ -139,7 +167,7 @@ export default function Team() {
               <div>
                 <p className="text-sm text-slate-600">Online Now</p>
                 <p className="text-2xl font-bold text-slate-900">
-                  {teamMembers.filter(m => m.availability_status === 'online').length}
+                  {teamMembers.filter(m => m.last_login && new Date(m.last_login) > new Date(Date.now() - 5*60000)).length}
                 </p>
               </div>
             </div>
@@ -168,43 +196,43 @@ export default function Team() {
           <CardTitle>Team Members</CardTitle>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+              <p className="text-red-700 text-sm"><strong>Error:</strong> {error.message || JSON.stringify(error)}</p>
+            </div>
+          )}
           {isLoading ? (
             <div className="text-center py-8 text-slate-500">Loading...</div>
           ) : teamMembers.length === 0 ? (
             <div className="text-center py-12">
               <Users className="w-12 h-12 mx-auto text-slate-300 mb-3" />
               <p className="text-slate-500">No team members yet</p>
+              <p className="text-slate-400 text-sm mt-2">teamMembers value: {JSON.stringify(teamMembers)}</p>
             </div>
           ) : (
             <div className="grid gap-4">
               {teamMembers.map((member) => (
-                <div key={member.id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                <div key={member._id} className="flex items-center justify-between p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-4">
                     <Avatar className="w-12 h-12">
                       <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-semibold">
-                        {member.user_email?.charAt(0).toUpperCase()}
+                        {member.full_name?.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="font-semibold text-slate-900">{member.user_email}</p>
+                        <p className="font-semibold text-slate-900">{member.full_name}</p>
                         <Badge className={roleColors[member.role]}>
                           {member.role}
                         </Badge>
-                        <Badge className={statusColors[member.availability_status]}>
-                          {member.availability_status}
+                        <Badge className={statusColors[member.status] || 'bg-slate-100 text-slate-700'}>
+                          {member.status}
                         </Badge>
                       </div>
                       <div className="flex items-center gap-3 text-sm text-slate-600">
-                        <span>Max chats: {member.max_concurrent_chats}</span>
+                        <span>{member.email}</span>
                         <span>•</span>
-                        <span>Active: {member.current_active_chats || 0}</span>
-                        {member.specialties && member.specialties.length > 0 && (
-                          <>
-                            <span>•</span>
-                            <span>{member.specialties.join(', ')}</span>
-                          </>
-                        )}
+                        <span>{new Date(member.last_login || member.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
                   </div>
@@ -212,7 +240,7 @@ export default function Team() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => handleDelete(member.id)}
+                      onClick={() => handleDelete(member._id)}
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     >
                       <Trash2 className="w-4 h-4" />

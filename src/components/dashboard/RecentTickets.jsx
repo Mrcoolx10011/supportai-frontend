@@ -20,7 +20,44 @@ const statusColors = {
   closed: "bg-slate-100 text-slate-600"
 };
 
-export default function RecentTickets({ tickets, isLoading }) {
+export default function RecentTickets({ tickets, isLoading, onSelectTicket, selectedTicketId }) {
+  // Show demo data if no tickets
+  const displayTickets = tickets && tickets.length > 0 ? tickets : [
+    {
+      id: 'demo-1',
+      title: 'API Integration Not Working',
+      customer_name: 'John Doe',
+      customer_email: 'john@example.com',
+      priority: 'high',
+      status: 'in_progress',
+      created_date: new Date().toISOString(),
+      category: 'Technical Issue',
+      description: 'Our API integration is throwing 500 errors when trying to authenticate'
+    },
+    {
+      id: 'demo-2',
+      title: 'Login Page Bug',
+      customer_name: 'Jane Smith',
+      customer_email: 'jane@example.com',
+      priority: 'medium',
+      status: 'open',
+      created_date: new Date(Date.now() - 3600000).toISOString(),
+      category: 'Bug',
+      description: 'Cannot login with OAuth, getting redirect loop'
+    },
+    {
+      id: 'demo-3',
+      title: 'Performance Issues',
+      customer_name: 'Bob Johnson',
+      customer_email: 'bob@example.com',
+      priority: 'critical',
+      status: 'in_progress',
+      created_date: new Date(Date.now() - 7200000).toISOString(),
+      category: 'Performance',
+      description: 'Dashboard loads very slowly, taking 15+ seconds'
+    }
+  ];
+
   if (isLoading) {
     return (
       <Card className="shadow-lg">
@@ -41,12 +78,25 @@ export default function RecentTickets({ tickets, isLoading }) {
   return (
     <Card className="shadow-lg border-none">
       <CardHeader className="border-b border-slate-100">
-        <CardTitle className="text-xl">Recent Tickets</CardTitle>
+        <CardTitle className="text-xl">Recent Tickets {tickets?.length > 0 ? `(${tickets.length})` : '(Demo)'}</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         <div className="divide-y divide-slate-100">
-          {tickets.map((ticket) => (
-            <div key={ticket.id} className="p-6 hover:bg-slate-50 transition-colors cursor-pointer">
+          {displayTickets.map((ticket) => {
+            const isSelected = selectedTicketId === ticket.id;
+            return (
+            <div 
+              key={ticket.id} 
+              onClick={() => {
+                console.log('✅ Ticket selected:', ticket);
+                onSelectTicket?.(ticket);
+              }}
+              className={`p-6 transition-all cursor-pointer border-l-4 ${
+                isSelected
+                  ? 'bg-blue-100 border-l-blue-600 shadow-md'
+                  : 'hover:bg-blue-50 border-l-transparent hover:border-l-blue-500'
+              }`}
+            >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
                   <h4 className="font-semibold text-slate-900 mb-1">{ticket.title}</h4>
@@ -70,7 +120,8 @@ export default function RecentTickets({ tickets, isLoading }) {
                 <div>{ticket.category}</div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </CardContent>
     </Card>

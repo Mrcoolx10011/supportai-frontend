@@ -12,30 +12,33 @@ import LiveChat from './pages/LiveChat';
 import KnowledgeBase from './pages/KnowledgeBase';
 import CannedResponses from './pages/CannedResponses';
 import Team from './pages/Team';
+import TeamLeaderboard from './pages/TeamLeaderboard';
 import Analytics from './pages/Analytics';
 import Integration from './pages/Integration';
 import AISettings from './pages/AISettings';
 import Clients from './pages/Clients';
 import Settings from './pages/Settings';
 import ChatWidget from './pages/ChatWidget';
+import LandingPage from './pages/LandingPage';
 
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
-  
+
   // Check if this is a public route (no auth needed)
   const isChatWidget = location.pathname === '/chatwidget' || location.pathname === '/ChatWidget';
   const isPublicTicketTracker = location.pathname === '/track-ticket';
-  const isPublicRoute = isChatWidget || isPublicTicketTracker;
-  
+  const isLandingPage = location.pathname === '/landing' || location.pathname === '/landing-page';
+  const isPublicRoute = isChatWidget || isPublicTicketTracker || isLandingPage;
+
   // Check authentication on app load (skip for public routes)
   useEffect(() => {
     if (isPublicRoute) {
       setLoading(false);
       return;
     }
-    
+
     const checkAuth = async () => {
       try {
         if (base44.auth.isAuthenticated()) {
@@ -101,6 +104,11 @@ function App() {
     return <ChatWidget />;
   }
 
+  // Render landing page without authentication
+  if (isLandingPage) {
+    return <LandingPage />;
+  }
+
   // Show login page if not authenticated
   if (!user) {
     return <LoginPage onLogin={handleLogin} />;
@@ -117,6 +125,7 @@ function App() {
         <Route path="/knowledgebase" element={<KnowledgeBase />} />
         <Route path="/cannedresponses" element={<CannedResponses />} />
         <Route path="/team" element={<Team />} />
+        <Route path="/teamleaderboard" element={<TeamLeaderboard />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/integration" element={<Integration />} />
         <Route path="/aisettings" element={<AISettings />} />
